@@ -1,11 +1,9 @@
 package com.harshad.pizzordercart.itemclicklistener
 
+import com.harshad.pizzordercart.data.local.CartEntity
+
 interface ItemClickListener {
 
-    fun onAddButtonCLick()
-    fun onCustomiseButtonClick(position: Int)
-    fun onIncrementButtonClick()
-    fun onDecrementButtonClick()
-    fun onSizeClick()
-    fun onCrustClick()
+    fun incrementCount(cartEntity: CartEntity, position: Int)
+    fun decrementCount(cartEntity: CartEntity, position: Int)
 }

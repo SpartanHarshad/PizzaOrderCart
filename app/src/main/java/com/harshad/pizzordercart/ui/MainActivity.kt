@@ -7,22 +7,24 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.harshad.pizzordercart.R
+import com.harshad.pizzordercart.adapter.ShowPizzaAdapter
 import com.harshad.pizzordercart.data.local.CartEntity
 import com.harshad.pizzordercart.data.model.Crust
 import com.harshad.pizzordercart.data.model.ResponseModel
 import com.harshad.pizzordercart.databinding.ActivityMainBinding
+import com.harshad.pizzordercart.itemclicklistener.ItemClickListener
 import com.harshad.pizzordercart.viewmodel.PizzaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.math.log
-
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), View.OnClickListener {
+class MainActivity : AppCompatActivity(), View.OnClickListener, ItemClickListener {
 
     val viewModel: PizzaViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
@@ -36,6 +38,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     var size_id = 0
     var cart_id: Long = 0
     var crustList = mutableListOf<Crust>()
+    var productList = mutableListOf<CartEntity>()
+    lateinit var showPizzaAdapter: ShowPizzaAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +47,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(binding.root)
         callApi()
         observeCart()
+        setRecyclerView()
+    }
+
+    private fun setRecyclerView() {
+        showPizzaAdapter = ShowPizzaAdapter(productList, this)
+        binding.rvCartList.layoutManager = LinearLayoutManager(this)
+        binding.rvCartList.adapter = showPizzaAdapter
     }
 
     private fun observeCart() {
@@ -55,6 +66,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             if (it != null) {
                 binding.tvCartTotalPrice.text = "₹ $it"
             }
+        })
+        viewModel.getAllItem().observe(this, Observer {
+            productList.clear()
+            productList.addAll(it)
+            showPizzaAdapter.notifyDataSetChanged()
         })
     }
 
@@ -73,7 +89,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.btnAddIntoCart.setOnClickListener(this)
         binding.tvIncreaseQuantity.setOnClickListener(this)
         binding.tvDecreaseQuantity.setOnClickListener(this)
-        binding.btnViewCart.setOnClickListener(this)
     }
 
     private fun getDefaultPizza() {
@@ -105,9 +120,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
             R.id.tvDecreaseQuantity -> {
                 decrementQuantity(cartEntity)
-            }
-            R.id.btnViewCart -> {
-
             }
         }
     }
@@ -161,7 +173,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         builder.setSingleChoiceItems(sizes, checkedItem) { dialog, which ->
             pos = which + 1
         }
-        builder.setPositiveButton("OK") { dialog, which ->
+        builder.setPositiveButton("Add To Cart") { dialog, which ->
             addCrustIntoCart(id, pos)
             crust_id = id
             size_id = pos
@@ -241,5 +253,26 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             crustSizes.add(crustList.get(crust_id).sizes.get(i).name)
         }
         return crustSizes.toTypedArray()
+    }
+
+    override fun incrementCount(cartEntity: CartEntity, position: Int) {
+        var itemQ = cartEntity.productQuantity + 1
+        var price: Double = cartEntity.productPerItemPrice * itemQ
+        var size = cartEntity.productSize
+        viewModel.updateProductQuantityModel(itemQ, price, size, cartEntity.cId!!.toLong())
+        showPizzaAdapter.notifyItemChanged(position)
+    }
+
+    override fun decrementCount(cartEntity: CartEntity, position: Int) {
+        if (cartEntity.productQuantity != 1) {
+            var itemQ = cartEntity.productQuantity - 1
+            var price: Double = cartEntity.productPerItemPrice * itemQ
+            var size = cartEntity.productSize
+            viewModel.updateProductQuantityModel(itemQ, price, size, cartEntity.cId!!.toLong())
+            showPizzaAdapter.notifyItemChanged(position)
+        } else {
+            viewModel.deleteItemFromCartModel(cartEntity)
+            showPizzaAdapter.notifyItemChanged(position)
+        }
     }
 }
