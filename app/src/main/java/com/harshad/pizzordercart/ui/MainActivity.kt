@@ -1,14 +1,19 @@
 package com.harshad.pizzordercart.ui
 
 import android.app.AlertDialog
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.liveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.harshad.pizzordercart.R
 import com.harshad.pizzordercart.adapter.ShowPizzaAdapter
@@ -22,6 +27,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.google.android.material.snackbar.Snackbar
+
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), View.OnClickListener, ItemClickListener {
@@ -45,7 +52,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ItemClickListene
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        callApi()
         observeCart()
         setRecyclerView()
     }
@@ -72,6 +78,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ItemClickListene
             productList.addAll(it)
             showPizzaAdapter.notifyDataSetChanged()
         })
+
+        if (checkInternetConnectivity(this)) {
+            callApi()
+            Toast.makeText(this, "Internet Is connected", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this,
+                "No internet connection Please Connect With Internet And Restart the app",
+                Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setValuesToViews() {
@@ -274,5 +289,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ItemClickListene
             viewModel.deleteItemFromCartModel(cartEntity)
             showPizzaAdapter.notifyItemChanged(position)
         }
+    }
+
+    private fun checkInternetConnectivity(context: Context): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
+        var isConnected = activeNetwork?.isConnectedOrConnecting == true
+        return isConnected
     }
 }
