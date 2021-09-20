@@ -1,3 +1,22 @@
 <resources>
-    <string name="app_name">PizzOrderCart</string>
+    <string name="app_name">PizzaOrderCart</string>
+    <string name="rupee">&#x20B9; 399</string>
+    <string name="btn_Customise">Customise</string>
+    <string name="txt_name">Pepper Barbecue Chicken</string>
+    <string name="txt_description">Pepper barbecue chicken for that extra zing</string>
+    <string name="btn_add_to_cart">Add</string>
+    <string name="txt_crust">Crust</string>
+    <string name="txt_pizza_list">Pizza List</string>
+    <string name="txt_size">Size</string>
+    <string-array name="size_array">
+        <item>Regular</item>
+        <item>Large</item>
+        <item>Medium</item>
+    </string-array>
+
+    <string-array name="Crust_array">
+        <item>Crust 1</item>
+        <item>Crust 2</item>
+        <item>Crust 3</item>
+    </string-array>
 </resources>
