@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.room.Room
 import com.harshad.pizzordercart.data.local.PizzaDatabase
 import com.harshad.pizzordercart.data.remote.PizzaService
+import com.harshad.pizzordercart.util.Constants.BASE_URL
 import com.harshad.pizzordercart.util.Constants.MOCK_URL
 import dagger.Module
 import dagger.Provides
@@ -25,7 +26,7 @@ object PizzaCartModule {
         return Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
             .client(OkHttpClient.Builder().addInterceptor(interceptor = interceptor).build())
-            .baseUrl(MOCK_URL).build().create(PizzaService::class.java)
+            .baseUrl(BASE_URL).build().create(PizzaService::class.java)
     }
 
     @Provides

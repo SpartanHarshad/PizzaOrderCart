@@ -4,6 +4,6 @@ import com.harshad.pizzordercart.data.model.ResponseModel
 import retrofit2.http.GET
 
 interface PizzaService {
-    @GET("/")//pizzas
+    @GET("pizzas")//pizzas
     suspend fun fetchAllPizza(): ResponseModel
 }
