@@ -1,8 +1,8 @@
 package com.harshad.pizzordercart.ui
 
+import android.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -25,8 +25,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     var defaultCrustName = ""
     var defaultPrice: Double = 0.0
     var defaultSize = ""
-    var crustList = listOf<Crust>()
-    var sizeList = listOf<Size>()
+    var dCrust = 0
+    var dSize = 0;
+    var crust_id = 0
+    var size_id = 0
+    var crustList = mutableListOf<Crust>()
+    var sizeList = mutableListOf<Size>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,21 +47,21 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             binding.ivIsVegIcon.visibility = View.GONE
             binding.ivIsNonVegIcon.visibility = View.VISIBLE
         }
-        binding.tvPrice.text = "₹ $defaultPrice"
-        binding.tvPizzaName.text = responseModel.name
+        binding.tvPrice.text = "₹ ${responseModel.crusts[dCrust].sizes.get(dSize).price}"
+        binding.tvPizzaName.text = responseModel.crusts[dCrust].name
         binding.tvPizzaDescription.text = responseModel.description
         binding.btnCustomise.setOnClickListener(this)
         binding.btnAddIntoCart.setOnClickListener(this)
     }
 
     private fun getDefaultPizza() {
-        var dCrust = responseModel.defaultCrust
-        crustList = responseModel.crusts
+        dCrust = responseModel.defaultCrust
+        crustList.addAll(responseModel.crusts)
         for (i in 0 until crustList.size) {
             if (crustList[i].id == dCrust) {
                 defaultCrustName = crustList[i].name
-                var dSize = crustList[i].defaultSize
-                sizeList = crustList[i].sizes
+                dSize = crustList[i].defaultSize
+                sizeList.addAll(crustList[i].sizes)
                 for (j in 0 until sizeList.size) {
                     if (sizeList[j].id == dSize) {
                         defaultSize = sizeList[j].name
@@ -79,11 +83,82 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.btnCustomise -> {
-                Toast.makeText(this, "Customise pizza", Toast.LENGTH_SHORT).show()
+
             }
             R.id.btnAddIntoCart -> {
-                Toast.makeText(this, "Add pizza Into Cart", Toast.LENGTH_SHORT).show()
+                showCrust()
             }
         }
+    }
+
+    private fun showCrust() {
+        var crusts = getCrustList()
+        val builder = AlertDialog.Builder(this)
+        val checkedItem = dCrust - 1
+        builder.setTitle("Choose Crust")
+        var pos = 0
+        builder.setSingleChoiceItems(crusts, checkedItem) { dialog, which ->
+            pos = which
+        }
+        builder.setPositiveButton("OK") { dialog, which ->
+            showCrustSize(pos)
+            Toast.makeText(this, "$pos", Toast.LENGTH_SHORT).show()
+        }
+        builder.setNegativeButton("Cancel", null)
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun showCrustSize(id: Int) {
+        var sizes = getSizeForSpecificCrust(id)
+        val builder = AlertDialog.Builder(this)
+        val checkedItem = id - 1
+        builder.setTitle("Choose Size")
+        var pos = 0
+        builder.setSingleChoiceItems(sizes, checkedItem) { dialog, which ->
+            pos = which + 1
+        }
+        builder.setPositiveButton("OK") { dialog, which ->
+            addCrustIntoCart(id, pos)
+            crust_id = id
+            size_id = pos
+        }
+        builder.setNegativeButton("Cancel", null)
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    /**
+     * in this method we are adding pizza into cart
+     */
+    private fun addCrustIntoCart(crust_id: Int, size_id: Int) {
+        var name = crustList.get(crust_id).name
+        var size = crustList.get(crust_id).sizes.get(size_id - 1).name
+        var price = crustList.get(crust_id).sizes.get(size_id - 1).price
+        Toast.makeText(this, "$name | $size | $price", Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * in this method we are returning array of crust to show in dialog
+     */
+    private fun getCrustList(): Array<String> {
+        var crusts = mutableListOf<String>()
+        for (i in 0 until crustList.size) {
+            crusts.add(crustList[i].name)
+        }
+        return crusts.toTypedArray()
+    }
+
+    /**
+     * in this method we are returning array of size to show in dialog with given crust_id
+     */
+    private fun getSizeForSpecificCrust(crust_id: Int): Array<String> {
+        var crustSizes = mutableListOf<String>()
+        var c = crustList
+        var len = crustList.get(crust_id).sizes.size
+        for (i in 0 until len) {
+            crustSizes.add(crustList.get(crust_id).sizes.get(i).name)
+        }
+        return crustSizes.toTypedArray()
     }
 }
