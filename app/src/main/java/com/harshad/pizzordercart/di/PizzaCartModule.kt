@@ -1,7 +1,9 @@
 package com.harshad.pizzordercart.di
 
+import android.app.Application
+import androidx.room.Room
+import com.harshad.pizzordercart.data.local.PizzaDatabase
 import com.harshad.pizzordercart.data.remote.PizzaService
-import com.harshad.pizzordercart.util.Constants.BASE_URL
 import com.harshad.pizzordercart.util.Constants.MOCK_URL
 import dagger.Module
 import dagger.Provides
@@ -26,4 +28,9 @@ object PizzaCartModule {
             .baseUrl(MOCK_URL).build().create(PizzaService::class.java)
     }
 
+    @Provides
+    fun providesPizzaDatabase(app: Application): PizzaDatabase {
+        return Room.databaseBuilder(app, PizzaDatabase::class.java, "pizzaDatabase")
+            .fallbackToDestructiveMigration().build()
+    }
 }

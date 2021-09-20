@@ -8,15 +8,8 @@
     <string name="txt_crust">Crust</string>
     <string name="txt_pizza_list">Pizza List</string>
     <string name="txt_size">Size</string>
-    <string-array name="size_array">
-        <item>Regular</item>
-        <item>Large</item>
-        <item>Medium</item>
-    </string-array>
-
-    <string-array name="Crust_array">
-        <item>Crust 1</item>
-        <item>Crust 2</item>
-        <item>Crust 3</item>
-    </string-array>
+    <string name="txt_cartCount">Total Cart Items : </string>
+    <string name="txt_prices">Total Price :</string>
+    <string name="txt_view">View Cart</string>
+    <string name="txt_pizza">Order Pizza</string>
 </resources>
